@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "593693771697",
+    "project_id": "artlink-studio",
+    "storage_bucket": "artlink-studio.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:593693771697:android:b2e12b0cc955b6243c9f90",
+        "android_client_info": {
+          "package_name": "com.example.p2_artapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANNLpNhQeAlkxxh9Dql9DZk8Ja1s4yCYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
