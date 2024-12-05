@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:p2_artapp/AddArtworkPage.dart';
 import 'package:p2_artapp/EditArtworkPage.dart';
 
 
@@ -31,7 +32,12 @@ class ArtistWorksListedPage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              Navigator.pushNamed(context, '/uploadArtwork'); // Navigate to the upload page
+              Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddArtworkPage(artistId: artistId),
+              )
+              );  // Navigate to the upload page
             },
           ),
         ],
@@ -99,7 +105,7 @@ class ArtistWorksListedPage extends StatelessWidget {
                             Navigator.push(
                               context, 
                               MaterialPageRoute(
-                                builder: (context) => EditArtworkPage(artworkId:artworkId ),
+                                builder: (context) => EditArtworkPage(artworkId:artworkId),
                               ),
                               );
                           },
