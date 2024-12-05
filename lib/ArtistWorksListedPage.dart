@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
-
-
+import 'package:p2_artapp/EditArtworkPage.dart';
 
 
 class ArtistWorksListedPage extends StatelessWidget {
@@ -98,7 +96,12 @@ class ArtistWorksListedPage extends StatelessWidget {
                         IconButton(
                           icon: Icon(Icons.edit, color: Colors.orange),
                           onPressed: () {
-                            Navigator.pushNamed(context, '/editArtwork', arguments: artworkId);
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(
+                                builder: (context) => EditArtworkPage(artworkId:artworkId ),
+                              ),
+                              );
                           },
                         ),
                         IconButton(
