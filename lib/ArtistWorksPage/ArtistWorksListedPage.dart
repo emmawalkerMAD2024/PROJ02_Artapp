@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:p2_artapp/AddArtworkPage.dart';
-import 'package:p2_artapp/EditArtworkPage.dart';
+import 'package:p2_artapp/ArtistWorksPage/AddArtworkPage.dart';
+import 'package:p2_artapp/ArtistWorksPage/EditArtworkPage.dart';
 
 
 class ArtistWorksListedPage extends StatelessWidget {
