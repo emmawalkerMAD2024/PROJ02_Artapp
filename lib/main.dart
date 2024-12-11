@@ -1,7 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'signup_page.dart';
+import 'login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -21,7 +25,7 @@ class MyApp extends StatelessWidget {
 
 class LandingPage extends StatelessWidget {
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
@@ -53,7 +57,7 @@ class LandingPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, 
+                      color: Colors.white,
                     ),
                   ),
                   SizedBox(height: 30),
@@ -62,23 +66,23 @@ class LandingPage extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          print('Artist Login');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginPage()),
+                          );
                         },
-                        child: Text('Artist Login'),
+                        child: Text('Login'),
                       ),
                       SizedBox(width: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          print('Buyer Login');
-                        },
-                        child: Text('Buyer Login'),
-                      ),
                     ],
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      print('Sign Up');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUpPage()),
+                      );
                     },
                     child: Text('Sign Up'),
                   ),
