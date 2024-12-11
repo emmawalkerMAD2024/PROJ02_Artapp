@@ -25,7 +25,6 @@ class LandingPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Fullscreen background image
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -54,7 +53,7 @@ class LandingPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Ensure text is visible
+                      color: Colors.white, 
                     ),
                   ),
                   SizedBox(height: 30),
