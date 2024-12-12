@@ -68,6 +68,9 @@ flutter:
    - lib\assets\loginwelcome.png
    - lib\assets\newgradient.jpg
    - lib\assets\signupwelcome.png
+   - lib\assets\abg.png
+   - lib\assets\whiteshadow.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

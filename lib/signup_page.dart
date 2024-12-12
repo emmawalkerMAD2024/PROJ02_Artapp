@@ -1,5 +1,8 @@
+// signup_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
 
 class SignUpPage extends StatelessWidget {
   final TextEditingController firstNameController = TextEditingController();
@@ -8,6 +11,11 @@ class SignUpPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+
+  String generateArtistId() {
+    final Random random = Random();
+    return List.generate(12, (index) => random.nextInt(10).toString()).join();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +40,21 @@ class SignUpPage extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Passwords do not match!')));
                   } else {
                     try {
-                      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                         email: emailController.text,
                         password: passwordController.text,
                       );
+
+                      String artistId = generateArtistId();
+                      await FirebaseFirestore.instance.collection('artists').doc(userCredential.user!.uid).set({
+                        'email': emailController.text,
+                        'firstname': firstNameController.text,
+                        'lastname': lastNameController.text,
+                        'username': usernameController.text,
+                        'password': passwordController.text,
+                        'artistId': artistId,
+                      });
+
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sign up successful!')));
                       Navigator.pop(context);
                     } catch (e) {
