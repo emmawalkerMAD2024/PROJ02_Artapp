@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'DetailedArtworkPage.dart';
+
 class BuyerMarketplacePage extends StatefulWidget {
   @override
   _BuyerMarketplacePageState createState() => _BuyerMarketplacePageState();
@@ -46,7 +48,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Marketplace'),
+        title: Text('ArtLink Studio Marketplace'),
       ),
       body: Column(
         children: [
@@ -129,7 +131,17 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
   }
 
   Widget _buildArtworkCard(QueryDocumentSnapshot artwork, String artistName) {
-    return Card(
+    return GestureDetector(
+      onTap: () {
+        // Navigate to Detailed Artwork Page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailedArtworkPage(artworkId: artwork.id ),
+          ),
+        );
+      },
+      child:Card(
       elevation: 4.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,8 +178,10 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
+          
         ],
       ),
+    )
     );
   }
 }
