@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'BuyerMarketplacePage.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -21,13 +22,23 @@ class LoginPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
-                      email: usernameController.text,
-                      password: passwordController.text,
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful!')));
+                    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                        .collection('artists')
+                        .where('username', isEqualTo: usernameController.text)
+                        .where('password', isEqualTo: passwordController.text)
+                        .get();
+
+                    if (querySnapshot.docs.isNotEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful!')));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage()),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid username or password')));
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid username or password')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                   }
                 },
                 child: Text('Login'),
