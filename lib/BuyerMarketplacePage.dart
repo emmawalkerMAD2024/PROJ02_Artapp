@@ -30,9 +30,10 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      final artistName = querySnapshot.docs.first['name'] ?? 'Unknown';
-      _artistCache[artistId] = artistName; // Cache the result
-      return artistName;
+      final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
+      final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
+      _artistCache[artistId] = "$artistFName $artistLName"; // Cache the result
+      return "$artistFName $artistLName";
     } else {
       print('No artist found for artistId: $artistId');
     }
