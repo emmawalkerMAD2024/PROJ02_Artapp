@@ -18,7 +18,7 @@ class SignUpPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Image.asset('C:/Users/emmaw/Downloads/MADProjects/p2_artapp/signupwelcome.png'),
+              Image.asset('lib/assets/signupwelcome.png'),
               TextField(controller: firstNameController, decoration: InputDecoration(labelText: 'First Name')),
               TextField(controller: lastNameController, decoration: InputDecoration(labelText: 'Last Name')),
               TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),

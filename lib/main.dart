@@ -33,7 +33,7 @@ class LandingPage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('C:/Users/emmaw/Downloads/MADProjects/p2_artapp/newgradient.jpg'),
+                image: AssetImage('lib/assets/newgradient.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -47,7 +47,7 @@ class LandingPage extends StatelessWidget {
                 children: [
                   SizedBox(height: 20),
                   Image.asset(
-                    'C:/Users/emmaw/Downloads/MADProjects/p2_artapp/logoshadow.png',
+                    'lib/assets/logoshadow.png',
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

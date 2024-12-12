@@ -14,7 +14,7 @@ class LoginPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Image.asset('C:/Users/emmaw/Downloads/MADProjects/p2_artapp/loginwelcome.png'),
+              Image.asset('lib/assets/loginwelcome.png'),
               TextField(controller: usernameController, decoration: InputDecoration(labelText: 'Username')),
               TextField(controller: passwordController, obscureText: true, decoration: InputDecoration(labelText: 'Password')),
               SizedBox(height: 20),
