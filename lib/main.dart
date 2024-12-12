@@ -33,7 +33,7 @@ class LandingPage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('lib/assets/newgradient.png'),
+                image: AssetImage('lib/assets/newgradient.jpg'),
                 fit: BoxFit.cover,
               ),
             ),

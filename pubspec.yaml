@@ -39,6 +39,7 @@ dependencies:
   cloud_firestore: ^5.5.0
   firebase_storage: ^12.3.6
   firebase_auth: ^5.3.4
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -68,7 +69,6 @@ flutter:
    - lib\assets\loginwelcome.png
    - lib\assets\newgradient.jpg
    - lib\assets\signupwelcome.png
-   - lib\assets\abg.png
    - lib\assets\whiteshadow.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
