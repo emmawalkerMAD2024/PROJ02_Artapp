@@ -12,8 +12,40 @@ class ProfileDashboardPage extends StatefulWidget {
 
 class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
   final TextEditingController bioController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final User? currentUser = FirebaseAuth.instance.currentUser;
   File? profileImage;
+  String username = "";
+  String profilePhotoUrl = "";
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    if (currentUser != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('artists')
+          .doc(currentUser!.uid) 
+          .get();
+
+      setState(() {
+        username = userDoc["username"] ?? "Username";
+        profilePhotoUrl = userDoc["profilePhotoUrl"] ?? "";
+        firstNameController.text = userDoc["firstname"] ?? "";
+        lastNameController.text = userDoc["lastname"] ?? "";
+        emailController.text = userDoc["email"] ?? "";
+        usernameController.text = userDoc["username"] ?? "";
+        passwordController.text = userDoc["password"] ?? "";
+      });
+    }
+  }
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
@@ -40,6 +72,10 @@ class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
           .doc(currentUser!.uid)
           .update({'profilePhotoUrl': downloadUrl});
 
+      setState(() {
+        profilePhotoUrl = downloadUrl;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Profile photo updated successfully!')),
       );
@@ -55,15 +91,22 @@ class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
       await FirebaseFirestore.instance.collection('artists').doc(currentUser!.uid).update({
         'bio': bioController.text,
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Bio updated successfully!')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Bio updated successfully!')));
     }
   }
 
-  void navigateToSettings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ProfileSettingsPage()),
-    );
+  Future<void> updateDetails() async {
+    if (currentUser != null) {
+      await FirebaseFirestore.instance.collection('artists').doc(currentUser!.uid).update({
+        'firstname': firstNameController.text,
+        'lastname': lastNameController.text,
+        'email': emailController.text,
+        'username': usernameController.text,
+        'password': passwordController.text,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Details updated successfully!')));
+    }
   }
 
   @override
@@ -71,99 +114,78 @@ class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile Dashboard'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: navigateToSettings,
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: pickImage,
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundImage: profileImage != null
-                        ? FileImage(profileImage!)
-                        : AssetImage('lib/assets/default_avatar.png') as ImageProvider,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    currentUser?.displayName ?? 'Username',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: bioController,
-              maxLength: 300,
-              decoration: InputDecoration(
-                labelText: 'Short Bio',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: updateBio,
-              child: Text('Update Bio'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ProfileSettingsPage extends StatelessWidget {
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile Settings'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(controller: firstNameController, decoration: InputDecoration(labelText: 'First Name')),
-              TextField(controller: lastNameController, decoration: InputDecoration(labelText: 'Last Name')),
-              TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
-              TextField(controller: usernameController, decoration: InputDecoration(labelText: 'Username')),
-              TextField(controller: passwordController, obscureText: true, decoration: InputDecoration(labelText: 'Password')),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: pickImage,
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundImage: profilePhotoUrl.isNotEmpty
+                          ? NetworkImage(profilePhotoUrl)
+                          : AssetImage('lib/assets/default_avatar.png')
+                              as ImageProvider,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      username,
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 20),
+              TextField(
+                controller: bioController,
+                maxLength: 300,
+                decoration: InputDecoration(
+                  labelText: 'Short Bio',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () async {
-                  final User? currentUser = FirebaseAuth.instance.currentUser;
-
-                  if (currentUser != null) {
-                    await FirebaseFirestore.instance.collection('artists').doc(currentUser.uid).update({
-                      'firstname': firstNameController.text,
-                      'lastname': lastNameController.text,
-                      'email': emailController.text,
-                      'username': usernameController.text,
-                      'password': passwordController.text,
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
-                  }
-                },
+                onPressed: updateBio,
+                child: Text('Update Bio'),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Your Details',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: firstNameController,
+                decoration: InputDecoration(labelText: 'First Name'),
+              ),
+              TextField(
+                controller: lastNameController,
+                decoration: InputDecoration(labelText: 'Last Name'),
+              ),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(labelText: 'Username'),
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: updateDetails,
                 child: Text('Save Changes'),
               ),
             ],

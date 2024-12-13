@@ -148,7 +148,6 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
               stream: FirebaseFirestore.instance
                   .collection('artworks')
                   .where('artistId', isNotEqualTo: currentUser)
-                 // .where('availability', isEqualTo: true )
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

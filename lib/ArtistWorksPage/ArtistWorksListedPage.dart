@@ -6,16 +6,14 @@ import 'package:p2_artapp/ArtistWorksPage/EditArtworkPage.dart';
 
 
 class ArtistWorksListedPage extends StatelessWidget {
-  final String artistId; // Unique ID for the logged-in artist
+  final String artistId;
 
   ArtistWorksListedPage({required this.artistId});
 
-  // Helper method to delete artwork
+
   Future<void> deleteArtwork(String artworkId, String imageUrl) async {
     try {
-      // Remove from Firestore
       await FirebaseFirestore.instance.collection('artworks').doc(artworkId).delete();
-      // Remove from Firebase Storage
       await FirebaseStorage.instance.refFromURL(imageUrl).delete();
       print('Artwork deleted successfully.');
     } catch (error) {
@@ -37,7 +35,7 @@ class ArtistWorksListedPage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => AddArtworkPage(artistId: artistId),
               )
-              );  // Navigate to the upload page
+              );  
             },
           ),
         ],
