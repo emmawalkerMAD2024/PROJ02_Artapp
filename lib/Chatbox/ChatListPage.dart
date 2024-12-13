@@ -8,12 +8,54 @@ class ChatListPage extends StatelessWidget {
   ChatListPage({required this.currentUserId});
 
   Stream<QuerySnapshot> getUserChats() {
+     print('Fetching chats for user: $currentUserId');
     return FirebaseFirestore.instance
         .collection('chats')
         .where('participants', arrayContains: currentUserId)
         .orderBy('timestamp', descending: true)
         .snapshots();
+
   }
+
+  Future<List<String>> fetchUserDocIds(String otherUserId) async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('artists')
+        .where('artistId', isEqualTo: otherUserId)
+        .get();
+
+    // Extract document IDs
+    List<String> docIds = querySnapshot.docs.map((doc) => doc.id).toList();
+
+    
+    return docIds;
+  } catch (e) {
+    print('Error fetching user document IDs: $e');
+    return [];
+  }
+}
+
+Future<Map<String, dynamic>> fetchUserDetailsByUserId(String otherUserId) async {
+  try {
+    List<String> userDocIds = await fetchUserDocIds(otherUserId);
+    if (userDocIds.isNotEmpty) {
+      // Fetch the first matching user's details
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('artists')
+          .doc(userDocIds.first)
+          .get();
+      print(userSnapshot.data() as Map<String, dynamic>);
+      return userSnapshot.data() as Map<String, dynamic>;
+
+        
+    }
+    return {}; // Return empty if no matching user found
+  } catch (e) {
+    print('Error fetching user details: $e');
+    return {};
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +69,20 @@ class ChatListPage extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
+if (!snapshot.hasData) {
+      print('No data received from Firestore.');
+      return Center(child: Text('No messages yet.'));
+    }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No messages yet.'));
-          }
+    final chats = snapshot.data!.docs;
+    print('Number of chats found: ${chats.length}');
+    chats.forEach((chat) => print(chat.data()));
 
-          final chats = snapshot.data!.docs;
+    if (chats.isEmpty) {
+     // return Center(child: Text('No messages yet.'));
+    }
+        
+          
 
           return ListView.builder(
             itemCount: chats.length,
@@ -41,11 +91,9 @@ class ChatListPage extends StatelessWidget {
               final participants = chat['participants'];
               final otherUserId = participants.firstWhere((id) => id != currentUserId);
 
-              return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(otherUserId)
-                    .get(),
+
+              return FutureBuilder<Map<String, dynamic>>(
+                future: fetchUserDetailsByUserId(otherUserId),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) {
                     return ListTile(
@@ -54,12 +102,13 @@ class ChatListPage extends StatelessWidget {
                   }
 
                   final user = userSnapshot.data!;
-                  final userName = user['name'];
+                  
+                  final userName = user['firstname'] + " " + user['lastname'] ?? 'Unknown User';
                   final lastMessage = chat['lastMessage'];
-
+                  
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: NetworkImage(user['profilePicture']),
+                     // backgroundImage: NetworkImage(user['profilePicture']),
                     ),
                     title: Text(userName),
                     subtitle: Text(lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),

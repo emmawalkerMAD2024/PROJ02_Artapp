@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:p2_artapp/Chatbox/ChatListPage.dart';
 
 import 'Chatbox/ChatRoomPage.dart';
 
@@ -175,14 +176,14 @@ class ArtistProfilePage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                           ChatRoomPage( currentUserId: '101', otherUserId: '103',),
+                           ChatRoomPage(currentUserId: artistId, otherUserId: '101',),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
                   ),
-                  child: Text('Checkout'),
+                  child: Text('chatbox'),
                 ),
       ),
     );
