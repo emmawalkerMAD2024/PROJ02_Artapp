@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:p2_artapp/Chatbox/ChatListPage.dart';
 
 import 'Chatbox/ChatRoomPage.dart';
 
 class DetailedArtworkPage extends StatelessWidget {
   final String artworkId;
+  final String user;
 
-  DetailedArtworkPage({required this.artworkId});
+  DetailedArtworkPage({required this.artworkId, required this.user});
 
   Future<Map<String, dynamic>?> fetchArtworkData() async {
 
@@ -117,7 +117,7 @@ class DetailedArtworkPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            ArtistProfilePage(artistId: artwork['artistId']),
+                            ArtistProfilePage(artistId: artwork['artistId'], user: user,),
                       ),
                     );
                   },
@@ -160,8 +160,9 @@ class DetailedArtworkPage extends StatelessWidget {
 // Placeholder for Artist Profile Page
 class ArtistProfilePage extends StatelessWidget {
   final String artistId;
+  final String user;
 
-  ArtistProfilePage({required this.artistId});
+  ArtistProfilePage({required this.artistId, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +177,7 @@ class ArtistProfilePage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                           ChatRoomPage(currentUserId: artistId, otherUserId: '101',),
+                           ChatRoomPage(currentUserId: artistId, otherUserId: user,),
                       ),
                     );
                   },

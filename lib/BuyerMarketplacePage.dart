@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:p2_artapp/Chatbox/ChatListPage.dart';
 import 'ArtistWorksPage/ArtistWorksListedPage.dart';
 import 'profile_dashboard_page.dart';
 import 'main.dart';
@@ -76,6 +78,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
                   backgroundImage: AssetImage('lib/assets/newgradient.jpg'),
                 ),
               ),
+              
             ),
             ListTile(
               leading: Icon(Icons.dashboard),
@@ -88,12 +91,22 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.dashboard),
+              leading: Icon(Icons.brush),
               title: Text('Your Artwork'),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ArtistWorksListedPage(artistId: currentUser )),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.question_answer),
+              title: Text('Messages'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatListPage(currentUserId: currentUser)),
                 );
               },
             ),
@@ -200,7 +213,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailedArtworkPage(artworkId: artwork.id),
+            builder: (context) => DetailedArtworkPage(artworkId: artwork.id, user: currentUser),
           ),
         );
       },
