@@ -147,8 +147,8 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('artworks')
-                //  .where('artistId', isNotEqualTo: currentUser)
-                  .where('availability', isEqualTo: true )
+                  .where('artistId', isNotEqualTo: currentUser)
+                 // .where('availability', isEqualTo: true )
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -250,8 +250,12 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                '\$${artwork['price'].toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                artwork['availability'] ? '\$${artwork['price'].toStringAsFixed(2)}' : 'Sold Out',
+                style: TextStyle(
+                  fontSize: 16, 
+                  fontWeight: FontWeight.bold,
+                  color: artwork['availability'] ? Colors.black : Colors.red
+                  ),
               ),
             ),
           ],

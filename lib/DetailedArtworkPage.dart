@@ -134,19 +134,19 @@ class DetailedArtworkPage extends StatelessWidget {
 
                 // Checkout Button
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: artwork['availability'] ? ()  {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
+                         MaterialPageRoute(
                         builder: (context) =>
-                            CheckoutPage(artworkId: artworkId),
-                      ),
+                          CheckoutPage(artworkId: artworkId) ,
+                      )  ,
                     );
-                  },
+                  }: null, 
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
                   ),
-                  child: Text('Checkout'),
+                  child: Text(artwork['availability'] ?'Checkout' : 'Sold Out'),
                 ),
               ],
             ),
