@@ -32,7 +32,7 @@ class LoginPage extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful!')));
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage()),
+                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage(currentUser:usernameController.text,)),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid username or password')));

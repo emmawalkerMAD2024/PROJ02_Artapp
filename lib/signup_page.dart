@@ -45,14 +45,14 @@ class SignUpPage extends StatelessWidget {
                         password: passwordController.text,
                       );
 
-                      String artistId = generateArtistId();
+                     // String artistId = generateArtistId();
                       await FirebaseFirestore.instance.collection('artists').doc(userCredential.user!.uid).set({
                         'email': emailController.text,
                         'firstname': firstNameController.text,
                         'lastname': lastNameController.text,
                         'username': usernameController.text,
                         'password': passwordController.text,
-                        'artistId': artistId,
+                        'artistId': usernameController.text,
                       });
 
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sign up successful!')));

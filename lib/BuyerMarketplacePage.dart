@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'ArtistWorksPage/ArtistWorksListedPage.dart';
 import 'profile_dashboard_page.dart';
 import 'main.dart';
 import 'DetailedArtworkPage.dart';
 
 class BuyerMarketplacePage extends StatefulWidget {
+final String currentUser;
+
+  BuyerMarketplacePage({required this.currentUser});
+
   @override
-  _BuyerMarketplacePageState createState() => _BuyerMarketplacePageState();
+  _BuyerMarketplacePageState createState() => _BuyerMarketplacePageState(currentUser: currentUser);
 }
 
 class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
+
+  final String currentUser;
+
+ _BuyerMarketplacePageState({required this.currentUser});
+
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -23,35 +33,17 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
     return _artistCache[artistId]!;
   }
 
-  try {
-    // Query the `artists` collection for a document with the matching artistId
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('artists')
-        .where('artistId', isEqualTo: artistId)
-        .limit(1)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
-      final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
-      _artistCache[artistId] = "$artistFName $artistLName"; // Cache the result
-      return "$artistFName $artistLName";
-    } else {
-      print('No artist found for artistId: $artistId');
-
-    }
-
-    try {
+   try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('artists')
           .where('artistId', isEqualTo: artistId)
           .limit(1)
           .get();
-
       if (querySnapshot.docs.isNotEmpty) {
-        final artistName = querySnapshot.docs.first['name'] ?? 'Unknown';
-        _artistCache[artistId] = artistName;
-        return artistName;
+        final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
+      final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
+         _artistCache[artistId] = "$artistFName $artistLName";
+        return "$artistFName $artistLName";
       } else {
         print('No artist found for artistId: $artistId');
       }
@@ -59,8 +51,10 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
       print('Error fetching artist name for artistId $artistId: $error');
     }
 
-    return 'Unknown Artist';
+     return 'Unknown Artist';
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +84,16 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileDashboardPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.dashboard),
+              title: Text('Your Artwork'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ArtistWorksListedPage(artistId: currentUser )),
                 );
               },
             ),
@@ -130,15 +134,20 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('artworks')
-                  .where('availability', isEqualTo: true)
+                //  .where('artistId', isNotEqualTo: currentUser)
+                  .where('availability', isEqualTo: true )
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No artworks found.'));
+                if (!snapshot.hasData) {
+                  return Center(child: Text('(has not data) No artworks found. $currentUser'));
+                }
+
+                if (snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No artworks found. $currentUser'));
                 }
 
                 final artworks = snapshot.data!.docs.where((doc) {
@@ -162,8 +171,8 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
                     mainAxisSpacing: 8.0,
                   ),
                   itemCount: artworks.length,
-                  itemBuilder: (context, index) {
-                    final artwork = artworks[index];
+                  itemBuilder: (context, index) { 
+                      final artwork = artworks[index];
                     return FutureBuilder<String>(
                       future: _getArtistName(artwork['artistId']),
                       builder: (context, artistSnapshot) {
