@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:p2_artapp/Chatbox/ChatListPage.dart';
+
+import 'Chatbox/ChatRoomPage.dart';
 
 class DetailedArtworkPage extends StatelessWidget {
   final String artworkId;
@@ -28,7 +31,7 @@ class DetailedArtworkPage extends StatelessWidget {
           .get();
 
       final artistName = artistQuery.docs.isNotEmpty
-          ? artistQuery.docs.first['name']
+          ? (artistQuery.docs.first['firstname'] +" "+ artistQuery.docs.first['lastname'])
           : 'Unknown Artist';
        
 
@@ -167,7 +170,21 @@ class ArtistProfilePage extends StatelessWidget {
         title: Text('Artist Profile'),
       ),
       body: Center(
-        child: Text('Profile details for artist ID: $artistId'),
+        child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                           ChatRoomPage(currentUserId: artistId, otherUserId: '101',),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                  child: Text('chatbox'),
+                ),
       ),
     );
   }

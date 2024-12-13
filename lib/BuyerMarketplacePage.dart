@@ -17,8 +17,28 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
   Map<String, String> _artistCache = {};
 
   Future<String> _getArtistName(String artistId) async {
-    if (_artistCache.containsKey(artistId)) {
-      return _artistCache[artistId]!;
+
+  // Check if the artistName is already cached
+  if (_artistCache.containsKey(artistId)) {
+    return _artistCache[artistId]!;
+  }
+
+  try {
+    // Query the `artists` collection for a document with the matching artistId
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('artists')
+        .where('artistId', isEqualTo: artistId)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
+      final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
+      _artistCache[artistId] = "$artistFName $artistLName"; // Cache the result
+      return "$artistFName $artistLName";
+    } else {
+      print('No artist found for artistId: $artistId');
+
     }
 
     try {
