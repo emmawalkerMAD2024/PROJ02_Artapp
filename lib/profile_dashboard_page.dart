@@ -11,98 +11,61 @@ class ProfileDashboardPage extends StatefulWidget {
 }
 
 class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
-  final TextEditingController bioController = TextEditingController();
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final User? currentUser = FirebaseAuth.instance.currentUser;
-  File? profileImage;
-  String username = "";
-  String profilePhotoUrl = "";
-  bool isEditing = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  late Map<String, dynamic> _cachedArtistInfo;
+  File? _selectedImage;
 
   @override
   void initState() {
     super.initState();
-    fetchUserData();
+    _fetchCachedArtistInfo();
   }
 
-  Future<void> fetchUserData() async {
-    if (currentUser != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('artists')
-          .doc(currentUser!.uid)
-          .get();
+  Future<void> _fetchCachedArtistInfo() async {
+    final user = _auth.currentUser;
 
-      setState(() {
-        username = userDoc["username"] ?? "Username";
-        profilePhotoUrl = userDoc["profilePhotoUrl"] ?? "";
-        firstNameController.text = userDoc["firstname"] ?? "";
-        lastNameController.text = userDoc["lastname"] ?? "";
-        emailController.text = userDoc["email"] ?? "";
-        usernameController.text = userDoc["username"] ?? "";
-        passwordController.text = userDoc["password"] ?? "";
-        bioController.text = userDoc["bio"] ?? "";
-      });
+    if (user != null) {
+      final docSnapshot = await _firestore.collection('artists').doc(user.uid).get();
+      if (docSnapshot.exists) {
+        setState(() {
+          _cachedArtistInfo = docSnapshot.data() ?? {};
+        });
+      }
     }
   }
 
-  Future<void> pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        profileImage = File(pickedFile.path);
-      });
-      await uploadImageToFirebase(profileImage!);
-    }
-  }
-
-  Future<void> uploadImageToFirebase(File image) async {
+  Future<void> _editProfilePhoto() async {
     try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_photos/${currentUser!.uid}.jpg');
-      await storageRef.putFile(image);
-      final downloadUrl = await storageRef.getDownloadURL();
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
 
-      await FirebaseFirestore.instance
-          .collection('artists')
-          .doc(currentUser!.uid)
-          .update({'profilePhotoUrl': downloadUrl});
+        final user = _auth.currentUser;
+        if (user != null && _selectedImage != null) {
+          final storageRef = _storage.ref().child('profile_photos/${user.uid}.jpg');
+          await storageRef.putFile(_selectedImage!);
+          final photoURL = await storageRef.getDownloadURL();
 
-      setState(() {
-        profilePhotoUrl = downloadUrl;
-      });
+          await _firestore.collection('artists').doc(user.uid).update({
+            'photoURL': photoURL,
+          });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile photo updated successfully!')),
-      );
+          setState(() {
+            _cachedArtistInfo['photoURL'] = photoURL;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Profile photo updated successfully!")),
+          );
+        }
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload profile photo: $e')),
-      );
-    }
-  }
-
-  Future<void> updateDetails() async {
-    if (currentUser != null) {
-      await FirebaseFirestore.instance.collection('artists').doc(currentUser!.uid).update({
-        'firstname': firstNameController.text,
-        'lastname': lastNameController.text,
-        'email': emailController.text,
-        'username': usernameController.text,
-        'password': passwordController.text,
-        'bio': bioController.text,
-      });
-      setState(() {
-        isEditing = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Details updated successfully!')),
+        SnackBar(content: Text("Error updating profile photo: $e")),
       );
     }
   }
@@ -111,94 +74,71 @@ class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Dashboard'),
+        title: Text("Profile Dashboard"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+      body: _cachedArtistInfo == null
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: pickImage,
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundImage: profilePhotoUrl.isNotEmpty
-                          ? NetworkImage(profilePhotoUrl)
-                          : AssetImage('lib/assets/default_avatar.png')
-                              as ImageProvider,
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: _editProfilePhoto,
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _cachedArtistInfo['photoURL'] != null
+                              ? NetworkImage(_cachedArtistInfo['photoURL'])
+                              : AssetImage('lib/assets/placeholder.jpg') as ImageProvider,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          "Today is the day ${_cachedArtistInfo['username']}!",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    "Your Details",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Hello, $username!',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  SizedBox(height: 16),
+                  _buildInfoRow("First Name", _cachedArtistInfo['firstname']),
+                  _buildInfoRow("Last Name", _cachedArtistInfo['lastname']),
+                  _buildInfoRow("Email", _cachedArtistInfo['email']),
+                  _buildInfoRow("Username", _cachedArtistInfo['username']),
+                  _buildInfoRow("Password", "********"), // Avoid showing the password directly
                 ],
               ),
-              SizedBox(height: 20),
-              isEditing
-                  ? Column(
-                      children: [
-                        TextField(
-                          controller: firstNameController,
-                          decoration: InputDecoration(labelText: 'First Name'),
-                        ),
-                        TextField(
-                          controller: lastNameController,
-                          decoration: InputDecoration(labelText: 'Last Name'),
-                        ),
-                        TextField(
-                          controller: emailController,
-                          decoration: InputDecoration(labelText: 'Email'),
-                        ),
-                        TextField(
-                          controller: usernameController,
-                          decoration: InputDecoration(labelText: 'Username'),
-                        ),
-                        TextField(
-                          controller: passwordController,
-                          decoration: InputDecoration(labelText: 'Password'),
-                        ),
-                        TextField(
-                          controller: bioController,
-                          maxLength: 300,
-                          decoration: InputDecoration(labelText: 'Short Bio'),
-                          maxLines: 3,
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: updateDetails,
-                          child: Text('Save Changes'),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('First Name: ${firstNameController.text}'),
-                        Text('Last Name: ${lastNameController.text}'),
-                        Text('Email: ${emailController.text}'),
-                        Text('Username: ${usernameController.text}'),
-                        Text('Bio: ${bioController.text}'),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isEditing = true;
-                            });
-                          },
-                          child: Text('Edit Details'),
-                        ),
-                      ],
-                    ),
-            ],
+            ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text(
+            "$label: ",
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
-        ),
+          Expanded(
+            child: Text(value),
+          ),
+        ],
       ),
     );
   }
