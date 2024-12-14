@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'CartPage.dart';
 import 'Chatbox/ChatRoomPage.dart';
 
 class DetailedArtworkPage extends StatelessWidget {
@@ -8,6 +8,63 @@ class DetailedArtworkPage extends StatelessWidget {
   final String user;
 
   DetailedArtworkPage({required this.artworkId, required this.user});
+
+  
+
+  void addToCart(String userId, Map<String, dynamic> artwork, BuildContext context) async {
+  try {
+    final cartDoc = FirebaseFirestore.instance.collection('carts').doc(userId);
+    DocumentSnapshot cartSnapshot = await cartDoc.get();
+
+    if (cartSnapshot.exists) {
+      // Check if the item already exists in the cart
+      final data = cartSnapshot.data() as Map<String, dynamic>;
+      List<dynamic> items = data['items'] ?? [];
+      bool itemExists = items.any((item) => item['artworkId'] == artwork['artworkId']);
+
+      if (itemExists) {
+        // Show a notification if the item is already in the cart
+           final snackBar = SnackBar( content: const Text("Item Already in Cart\nYou can't add the same item to your cart twice."),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        return ;
+      }
+
+      // Add the new item to the cart
+      await cartDoc.update({
+        "items": FieldValue.arrayUnion([artwork]),
+      });
+    } else {
+      // Create a new cart if it doesn't exist
+      await cartDoc.set({
+        "items": [artwork],
+      });
+    }
+
+    // Show a success notification
+    print("test");
+
+    final snackBar = SnackBar( content: const Text("Added to Cart\nThe item has been added to your cart!"),
+              action: SnackBarAction(
+              label: 'View Cart',
+              onPressed: () {
+              Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CartPage(currentUserId: userId),
+              )
+              );  // Navigate to the upload page
+            },
+            ),
+          );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  } catch (e) {
+    print("Error adding to cart: $e");
+    
+  }
+}
+
 
   Future<Map<String, dynamic>?> fetchArtworkData() async {
 
@@ -134,19 +191,18 @@ class DetailedArtworkPage extends StatelessWidget {
 
                 // Checkout Button
                 ElevatedButton(
-                  onPressed: artwork['availability'] ? ()  {
-                    Navigator.push(
-                      context,
-                         MaterialPageRoute(
-                        builder: (context) =>
-                          CheckoutPage(artworkId: artworkId) ,
-                      )  ,
-                    );
+                  onPressed: artwork['availability'] ? ()  { final artworkData = {
+                  "artworkId": artworkId,
+                  "title": artwork['title'],
+                  "price": artwork['price'],
+                   "thumbnailUrl": artwork['imageUrl'],
+                   };
+                  addToCart(user, artworkData, context);
                   }: null, 
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 50),
                   ),
-                  child: Text(artwork['availability'] ?'Checkout' : 'Sold Out'),
+                  child: Text(artwork['availability'] ?'Add to Cart' : 'Sold Out'),
                 ),
               ],
             ),

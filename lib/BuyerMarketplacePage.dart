@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:p2_artapp/Chatbox/ChatListPage.dart';
 import 'ArtistWorksPage/ArtistWorksListedPage.dart';
+import 'CartPage.dart';
 import 'profile_dashboard_page.dart';
 import 'main.dart';
 import 'DetailedArtworkPage.dart';
@@ -97,6 +97,16 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ArtistWorksListedPage(artistId: currentUser )),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.shopping_cart),
+              title: Text('Cart'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CartPage(currentUserId: currentUser)),
                 );
               },
             ),
