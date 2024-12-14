@@ -86,7 +86,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfileDashboardPage()),
+                  MaterialPageRoute(builder: (context) => ProfileDashboardPage(artistId: currentUser )),
                 );
               },
             ),
