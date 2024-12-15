@@ -70,17 +70,28 @@ class CartPage extends StatelessWidget {
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 8.0),
                         child: ListTile(
-                          leading: item['imageUrl'] != null
+                          leading: item['thumbnailUrl'] != null
                               ? Image.network(
-                                  item['imageUrl'],
+                                  item['thumbnailUrl'],
                                   width: 100,
-                                  height: 100,
+                                  height: 200,
                                   fit: BoxFit.cover,
                                 )
                               : Icon(Icons.image, size: 50),
                           title: Text(item['title'] ?? "Untitled"),
                           subtitle: Text("Price: \$${item['price'] ?? 0.0}"),
+                          trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () async {
+                          await FirebaseFirestore.instance
+                              .collection('carts')
+                              .doc(currentUserId) 
+                              .update({
+                            "items": FieldValue.arrayRemove([item]),
+                          });
+                          }   
                         ),
+                      )
                       );
                     },
                   ),

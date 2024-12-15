@@ -44,13 +44,25 @@ class ConfirmationScreen extends StatelessWidget {
     }
   }
 
+    Future<void> _clearCart() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('carts')
+          .doc(currentUserId)
+          .update({'items': []});
+    } catch (e) {
+      print("Error clearing cart: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final random = Random();
     final confirmationNumber = random.nextInt(900000) + 100000; // Random 6-digit number
 
-    // Update availability after checkout
+     // Update availability and clear the cart after checkout
     _updateArtworkAvailability();
+    _clearCart();
 
     return FutureBuilder<String>(
       future: _getUserEmail(currentUserId),

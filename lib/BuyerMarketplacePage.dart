@@ -92,7 +92,7 @@ void getUserName() async {
             ),
              ListTile(  
               leading: Icon(Icons.face),
-              title: Text(name)),
+              title: Text(name, style: TextStyle(fontSize: 25),)),
             ListTile(
               leading: Icon(Icons.dashboard),
               title: Text('Profile Dashboard'),
