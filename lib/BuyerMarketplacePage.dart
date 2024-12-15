@@ -21,7 +21,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
   final String currentUser;
 
  _BuyerMarketplacePageState({required this.currentUser});
-
+  String name = '';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -45,6 +45,8 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
         final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
       final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
          _artistCache[artistId] = "$artistFName $artistLName";
+        // name = "$artistFName $artistLName";
+       //   print('this is the name  $name');
         return "$artistFName $artistLName";
       } else {
         print('No artist found for artistId: $artistId');
@@ -56,10 +58,17 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
      return 'Unknown Artist';
   }
 
+void getUserName() async {
+  name =  await _getArtistName(currentUser);
+}
+
   
 
   @override
   Widget build(BuildContext context) {
+  getUserName();
+  //print(name);
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('ArtLink Studio Marketplace'),
@@ -76,10 +85,14 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
                 child: CircleAvatar(
                   radius: 40,
                   backgroundImage: AssetImage('lib/assets/newgradient.jpg'),
+                 
                 ),
               ),
               
             ),
+             ListTile(  
+              leading: Icon(Icons.face),
+              title: Text(name)),
             ListTile(
               leading: Icon(Icons.dashboard),
               title: Text('Profile Dashboard'),
