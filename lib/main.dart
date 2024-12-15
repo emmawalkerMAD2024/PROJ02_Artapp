@@ -48,7 +48,7 @@ class LandingPage extends StatelessWidget {
                 children: [
                   SizedBox(height: 20),
                   Image.asset(
-                    'lib/assets/logoshadow.png',
+                    'lib/assets/logographic.png',
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
