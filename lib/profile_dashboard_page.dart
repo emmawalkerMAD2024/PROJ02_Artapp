@@ -1,173 +1,176 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 class ProfileDashboardPage extends StatefulWidget {
+  final String userId;
+
+  ProfileDashboardPage({required this.userId});
+
   @override
   _ProfileDashboardPageState createState() => _ProfileDashboardPageState();
 }
 
 class _ProfileDashboardPageState extends State<ProfileDashboardPage> {
-  final TextEditingController bioController = TextEditingController();
-  final User? currentUser = FirebaseAuth.instance.currentUser;
-  File? profileImage;
+  final _bioController = TextEditingController();
+  final _profilePictureController = TextEditingController();
+  String userName = "";
+  String bio = "";
+  String profilePicture = "";
+  int soldListings = 0;
+  double totalRevenue = 0.0;
 
-  Future<void> pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+    fetchSoldListingsData();
+  }
 
-    if (pickedFile != null) {
-      setState(() {
-        profileImage = File(pickedFile.path);
-      });
-      await uploadImageToFirebase(profileImage!);
+  Future<void> fetchUserData() async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('artists').doc(widget.userId).get();
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        setState(() {
+          userName = "${userData['firstname']} ${userData['lastname']}";
+          bio = userData['bio'] ?? "";
+          profilePicture = userData['profilePicture'] ?? "";
+          _bioController.text = bio;
+          _profilePictureController.text = profilePicture;
+        });
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
     }
   }
 
-  Future<void> uploadImageToFirebase(File image) async {
+  Future<void> fetchSoldListingsData() async {
     try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_photos/${currentUser!.uid}.jpg');
-      await storageRef.putFile(image);
-      final downloadUrl = await storageRef.getDownloadURL();
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('artworks')
+          .where('artistId', isEqualTo: widget.userId)
+          .where('availability', isEqualTo: false)
+          .get();
 
-      await FirebaseFirestore.instance
-          .collection('artists')
-          .doc(currentUser!.uid)
-          .update({'profilePhotoUrl': downloadUrl});
+      int soldCount = querySnapshot.docs.length;
+      double revenue = querySnapshot.docs.fold(
+        0.0,
+        (sum, doc) => sum + (doc['price'] ?? 0.0),
+      );
+
+      setState(() {
+        soldListings = soldCount;
+        totalRevenue = revenue;
+      });
+    } catch (e) {
+      print("Error fetching sold listings: $e");
+    }
+  }
+
+  Future<void> updateUserData() async {
+    try {
+      await FirebaseFirestore.instance.collection('artists').doc(widget.userId).update({
+        'bio': _bioController.text,
+        'profilePicture': _profilePictureController.text,
+      });
+
+      setState(() {
+        bio = _bioController.text;
+        profilePicture = _profilePictureController.text;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile photo updated successfully!')),
+        SnackBar(content: Text("Profile updated successfully!")),
       );
     } catch (e) {
+      print("Error updating user data: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload profile photo: $e')),
+        SnackBar(content: Text("Failed to update profile. Please try again.")),
       );
     }
-  }
-
-  Future<void> updateBio() async {
-    if (currentUser != null) {
-      await FirebaseFirestore.instance.collection('artists').doc(currentUser!.uid).update({
-        'bio': bioController.text,
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Bio updated successfully!')));
-    }
-  }
-
-  void navigateToSettings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ProfileSettingsPage()),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Dashboard'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: navigateToSettings,
-          ),
-        ],
+        title: Text('Your Profile'),
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // User Info
             Row(
               children: [
-                GestureDetector(
-                  onTap: pickImage,
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundImage: profileImage != null
-                        ? FileImage(profileImage!)
-                        : AssetImage('lib/assets/default_avatar.png') as ImageProvider,
-                  ),
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: profilePicture.isNotEmpty
+                      ? NetworkImage(profilePicture)
+                      : null,
+                  child: profilePicture.isEmpty
+                      ? Icon(Icons.person, size: 40)
+                      : null,
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    currentUser?.displayName ?? 'Username',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    userName,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 20),
+
+            // Sold Listings and Revenue
+            Text(
+              "Statistics",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text("Sold Listings: $soldListings"),
+            Text("Total Revenue: \$${totalRevenue.toStringAsFixed(2)}"),
+            SizedBox(height: 20),
+
+            // Editable Profile Info
+            Text(
+              "Update Your Profile",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
             TextField(
-              controller: bioController,
-              maxLength: 300,
+              controller: _bioController,
               decoration: InputDecoration(
-                labelText: 'Short Bio',
+                labelText: "Bio",
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
             SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: updateBio,
-              child: Text('Update Bio'),
+            TextField(
+              controller: _profilePictureController,
+              decoration: InputDecoration(
+                labelText: "Profile Picture URL",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // Save Button
+            Center(
+              child: ElevatedButton(
+                onPressed: updateUserData,
+                style: ElevatedButton.styleFrom(
+                 
+                  minimumSize: Size(double.infinity, 50),
+                ),
+                child: Text("Save Changes"),
+              ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class ProfileSettingsPage extends StatelessWidget {
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile Settings'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(controller: firstNameController, decoration: InputDecoration(labelText: 'First Name')),
-              TextField(controller: lastNameController, decoration: InputDecoration(labelText: 'Last Name')),
-              TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
-              TextField(controller: usernameController, decoration: InputDecoration(labelText: 'Username')),
-              TextField(controller: passwordController, obscureText: true, decoration: InputDecoration(labelText: 'Password')),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  final User? currentUser = FirebaseAuth.instance.currentUser;
-
-                  if (currentUser != null) {
-                    await FirebaseFirestore.instance.collection('artists').doc(currentUser.uid).update({
-                      'firstname': firstNameController.text,
-                      'lastname': lastNameController.text,
-                      'email': emailController.text,
-                      'username': usernameController.text,
-                      'password': passwordController.text,
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
-                  }
-                },
-                child: Text('Save Changes'),
-              ),
-            ],
-          ),
         ),
       ),
     );

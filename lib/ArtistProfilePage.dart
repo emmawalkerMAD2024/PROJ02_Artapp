@@ -17,7 +17,7 @@ class ArtistProfilePage extends StatelessWidget {
           .limit(1)
           .get();
 
-          print("this is the id $artistId");
+         // print("this is the id $artistId");
 
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.data();
@@ -57,6 +57,7 @@ class ArtistProfilePage extends StatelessWidget {
 
           final artistData = snapshot.data!;
           final artistName = "${artistData['firstname']} ${artistData['lastname']}";
+          final bio = artistData['bio'] ?? "This artist hasn't added a bio yet.";
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -83,6 +84,16 @@ class ArtistProfilePage extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                  // Artist Bio
+                Text(
+                  "Bio",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  bio,
+                  style: TextStyle(fontSize: 16),
                 ),
                 SizedBox(height: 20),
 

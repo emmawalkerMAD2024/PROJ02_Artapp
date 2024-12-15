@@ -24,7 +24,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
   final String userName;
 
  _BuyerMarketplacePageState({required this.userName, required this.currentUser});
-  String name = '';
+  String pic = '';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -47,9 +47,12 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
       if (querySnapshot.docs.isNotEmpty) {
         final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
       final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
+
+      final artistLpic = querySnapshot.docs.first['profilePicture'] ?? 'Unknown';
+
          _artistCache[artistId] = "$artistFName $artistLName";
-        // name = "$artistFName $artistLName";
-       //   print('this is the name  $name');
+         pic = "$artistLpic";
+         print('this is the name  $pic');
         return "$artistFName $artistLName";
       } else {
         print('No artist found for artistId: $artistId');
@@ -61,14 +64,28 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
      return 'Unknown Artist';
   }
 
+  Future<void> fetchUserData() async {
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('artists').doc(currentUser).get();
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+         
+          pic = userData['profilePicture'];
+        
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
+    }
+  }
 
-  
+
+   
 
   @override
   Widget build(BuildContext context) {
 
-  //print(name);
-    
+    fetchUserData();
+    print("thhis is the pic $pic");
     return Scaffold(
       appBar: AppBar(
         title: Text('ArtLink Studio Marketplace'),
@@ -84,7 +101,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
               child: Center(
                 child: CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage('lib/assets/newgradient.jpg'),
+                  backgroundImage:NetworkImage(pic)
                  
                 ),
               ),
@@ -99,7 +116,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfileDashboardPage()),
+                  MaterialPageRoute(builder: (context) => ProfileDashboardPage(userId: currentUser)),
                 );
               },
             ),
