@@ -5,6 +5,7 @@ import 'BuyerMarketplacePage.dart';
 class LoginPage extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  String name ='';
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +29,16 @@ class LoginPage extends StatelessWidget {
                         .where('password', isEqualTo: passwordController.text)
                         .get();
 
+                         final artistFName = querySnapshot.docs.first['firstname'] ?? 'Unknown';
+                         final artistLName = querySnapshot.docs.first['lastname'] ?? 'Unknown';
+
+                        name = "$artistFName $artistLName";
+
                     if (querySnapshot.docs.isNotEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful!')));
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage(currentUser:usernameController.text,)),
+                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage(currentUser:usernameController.text,userName: name)),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid username or password')));

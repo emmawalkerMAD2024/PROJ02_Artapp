@@ -9,18 +9,21 @@ import 'DetailedArtworkPage.dart';
 
 class BuyerMarketplacePage extends StatefulWidget {
 final String currentUser;
+final String userName;
 
-  BuyerMarketplacePage({required this.currentUser});
+
+  BuyerMarketplacePage({required this.currentUser, required this.userName});
 
   @override
-  _BuyerMarketplacePageState createState() => _BuyerMarketplacePageState(currentUser: currentUser);
+  _BuyerMarketplacePageState createState() => _BuyerMarketplacePageState( currentUser: currentUser, userName: userName);
 }
 
 class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
 
   final String currentUser;
+  final String userName;
 
- _BuyerMarketplacePageState({required this.currentUser});
+ _BuyerMarketplacePageState({required this.userName, required this.currentUser});
   String name = '';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -58,15 +61,12 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
      return 'Unknown Artist';
   }
 
-void getUserName() async {
-  name =  await _getArtistName(currentUser);
-}
 
   
 
   @override
   Widget build(BuildContext context) {
-  getUserName();
+
   //print(name);
     
     return Scaffold(
@@ -92,7 +92,7 @@ void getUserName() async {
             ),
              ListTile(  
               leading: Icon(Icons.face),
-              title: Text(name, style: TextStyle(fontSize: 25),)),
+              title: Text(userName, style: TextStyle(fontSize: 25),)),
             ListTile(
               leading: Icon(Icons.dashboard),
               title: Text('Profile Dashboard'),
@@ -119,7 +119,7 @@ void getUserName() async {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CartPage(currentUserId: currentUser)),
+                  MaterialPageRoute(builder: (context) => CartPage(currentUserId: currentUser,name : userName)),
                 );
               },
             ),
@@ -236,7 +236,7 @@ void getUserName() async {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailedArtworkPage(artworkId: artwork.id, user: currentUser),
+            builder: (context) => DetailedArtworkPage(artworkId: artwork.id, user: currentUser, userName: userName,),
           ),
         );
       },

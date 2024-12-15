@@ -6,8 +6,9 @@ import 'Chatbox/ChatRoomPage.dart';
 class DetailedArtworkPage extends StatelessWidget {
   final String artworkId;
   final String user;
+  final String userName;
 
-  DetailedArtworkPage({required this.artworkId, required this.user});
+  DetailedArtworkPage({required this.artworkId, required this.user, required this.userName});
 
   
 
@@ -52,7 +53,7 @@ class DetailedArtworkPage extends StatelessWidget {
               Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CartPage(currentUserId: userId),
+                builder: (context) => CartPage(currentUserId: userId, name: userName,),
               )
               );  // Navigate to the upload page
             },

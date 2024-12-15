@@ -6,9 +6,10 @@ import '../BuyerMarketplacePage.dart';
 
 class ConfirmationScreen extends StatelessWidget {
   final String currentUserId;
-  final List<Map<String, dynamic>> cartItems; // Receive cart items
+  final List<Map<String, dynamic>> cartItems;
+  final String name; // Receive cart items
 
-  ConfirmationScreen({required this.currentUserId, required this.cartItems});
+  ConfirmationScreen({required this.currentUserId, required this.cartItems, required this.name});
 
   Future<String> _getUserEmail(String currentUserId) async {
     try {
@@ -26,6 +27,26 @@ class ConfirmationScreen extends StatelessWidget {
       }
     } catch (e) {
       return "Error retrieving email";
+    }
+  }
+
+  Future<String> _getUserName(String currentUserId) async {
+    try {
+      // Query the users collection where the artistId matches currentUserId
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('artists')
+          .where('artistId', isEqualTo: currentUserId)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final userDoc = querySnapshot.docs.first.data();
+        final name = "$userDoc['firstname'] $userDoc['lastname']";
+        return name ?? "Unknown";
+      } else {
+        return "Name not found";
+      }
+    } catch (e) {
+      return "Error retrieving Name";
     }
   }
 
@@ -123,7 +144,7 @@ class ConfirmationScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage(currentUser:currentUserId)),
+                        MaterialPageRoute(builder: (context) => BuyerMarketplacePage(currentUser:currentUserId, userName: name,)),
                       );
                   },
                   child: Text("Return to Home"),

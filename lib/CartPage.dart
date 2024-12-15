@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CartPage extends StatelessWidget {
   final String currentUserId;
+  final String name;
 
-  CartPage({required this.currentUserId});
+  CartPage({required this.currentUserId, required this.name});
 
   Future<List<Map<String, dynamic>>> _getCartItems() async {
     try {
@@ -109,7 +110,8 @@ class CartPage extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => CheckoutPage(
                           currentUserId: currentUserId,
-                          cartItems: cartItems, // Pass the cart items here
+                          cartItems: cartItems,
+                          name: name // Pass the cart items here
                         ),
                       ),
                     );

@@ -3,9 +3,10 @@ import 'ConfirmationScreen.dart';
 
 class CheckoutPage extends StatefulWidget {
   final String currentUserId;
-  final List<Map<String, dynamic>> cartItems; // Pass cart items
+  final List<Map<String, dynamic>> cartItems;
+  final String name; // Pass cart items
 
-  CheckoutPage({required this.currentUserId, required this.cartItems});
+  CheckoutPage({required this.currentUserId, required this.cartItems, required this.name});
 
   @override
   _CheckoutPageState createState() => _CheckoutPageState();
@@ -75,7 +76,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       MaterialPageRoute(
                         builder: (context) => ConfirmationScreen(
                           currentUserId: widget.currentUserId,
-                          cartItems: widget.cartItems, // Pass cart items
+                          cartItems: widget.cartItems,
+                          name: widget.name // Pass cart items
                         ),
                       ),
                     );
