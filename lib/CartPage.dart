@@ -73,8 +73,8 @@ class CartPage extends StatelessWidget {
                           leading: item['imageUrl'] != null
                               ? Image.network(
                                   item['imageUrl'],
-                                  width: 50,
-                                  height: 50,
+                                  width: 100,
+                                  height: 100,
                                   fit: BoxFit.cover,
                                 )
                               : Icon(Icons.image, size: 50),
