@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:p2_artapp/BuyerMarketplacePage.dart';
 import 'signup_page.dart';
 import 'login_page.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +48,7 @@ class LandingPage extends StatelessWidget {
                 children: [
                   SizedBox(height: 20),
                   Image.asset(
-                    'lib/assets/logographic.png',
+                    'lib/assets/logoshadow.png',
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

@@ -7,16 +7,20 @@ class AddArtworkPage extends StatefulWidget {
   AddArtworkPage({required this.artistId});
 
   @override
-  _AddArtworkPageState createState() => _AddArtworkPageState();
+  _AddArtworkPageState createState() => _AddArtworkPageState(artistId: artistId);
 }
 
 class _AddArtworkPageState extends State<AddArtworkPage> {
+   _AddArtworkPageState({required this.artistId});
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
   bool _availability = true;
   bool _isLoading = false;
+  
+  final String artistId;
 
   Future<void> _addArtwork() async {
     if (_formKey.currentState!.validate()) {
@@ -25,7 +29,7 @@ class _AddArtworkPageState extends State<AddArtworkPage> {
       });
 
       try {
-        await FirebaseFirestore.instance.collection('artworks').add({
+        await FirebaseFirestore.instance.collection('artworks').doc(_titleController.text).set({
           'artistId': widget.artistId, // Assign the artist's ID
           'title': _titleController.text,
           'price': double.parse(_priceController.text),
