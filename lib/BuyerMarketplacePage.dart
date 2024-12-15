@@ -273,7 +273,7 @@ class _BuyerMarketplacePageState extends State<BuyerMarketplacePage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                artwork['availability'] ? '\$${artwork['price'].toStringAsFixed(2)}' : 'Sold Out',
+                artwork['availability'] ? '\$${artwork['price'].toStringAsFixed(2)}' : 'Sold',
                 style: TextStyle(
                   fontSize: 16, 
                   fontWeight: FontWeight.bold,

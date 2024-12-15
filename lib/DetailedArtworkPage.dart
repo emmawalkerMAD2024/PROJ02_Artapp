@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'ArtistProfilePage.dart';
 import 'CartPage.dart';
 import 'Chatbox/ChatRoomPage.dart';
 
@@ -166,7 +167,7 @@ class DetailedArtworkPage extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                 ChatRoomPage(currentUserId: user, otherUserId: user,),
+                                 ArtistProfilePage(currentUserId: user, artistId: artwork['artistId'])
                           ),
                         );
                       },
