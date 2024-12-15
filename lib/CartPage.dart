@@ -1,112 +1,114 @@
 import 'package:flutter/material.dart';
+import 'Checkout/CheckoutPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 class CartPage extends StatelessWidget {
   final String currentUserId;
 
   CartPage({required this.currentUserId});
 
-  Future<DocumentSnapshot> fetchCart() async {
-    return FirebaseFirestore.instance.collection('carts').doc(currentUserId).get();
+  Future<List<Map<String, dynamic>>> _getCartItems() async {
+    try {
+      final cartSnapshot = await FirebaseFirestore.instance
+          .collection('carts')
+          .doc(currentUserId)
+          .get();
+
+      if (cartSnapshot.exists) {
+        final data = cartSnapshot.data();
+        List<dynamic> items = data?['items'] ?? [];
+        return items.cast<Map<String, dynamic>>();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Error fetching cart items: $e");
+      return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
-      
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cart"),
+        title: Text("Your Cart"),
       ),
-      body: FutureBuilder<DocumentSnapshot>(
-        future: fetchCart(),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _getCartItems(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return Center(child: Text("Your cart is empty."));
+          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                "Your cart is empty.",
+                style: TextStyle(fontSize: 18),
+              ),
+            );
           }
 
-          final cartData = snapshot.data!.data() as Map<String, dynamic>;
-          final items = List<Map<String, dynamic>>.from(cartData['items']);
-          double total = items.fold(0, (sum, item) => sum + item['price']);
+          final cartItems = snapshot.data!;
 
-          double tax = total * 0.10; // 10% tax
-          double totalWithTax = total + tax;
+          double totalPrice = cartItems.fold(
+            0.0,
+            (sum, item) => sum + (item['price'] ?? 0.0),
+          );
 
-
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return ListTile(
-                      leading: Image.network(item['thumbnailUrl'], width: 150, height: 150),
-                      title: Text(item['title'],style:TextStyle(fontSize: 20)),
-                      subtitle: Text("\$${item['price'].toStringAsFixed(2)}"),
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () async {
-                          await FirebaseFirestore.instance
-                              .collection('carts')
-                              .doc(currentUserId) 
-                              .update({
-                            "items": FieldValue.arrayRemove([item]),
-                          });
-                        },
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: cartItems.length,
+                    itemBuilder: (context, index) {
+                      final item = cartItems[index];
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 8.0),
+                        child: ListTile(
+                          leading: item['imageUrl'] != null
+                              ? Image.network(
+                                  item['imageUrl'],
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                )
+                              : Icon(Icons.image, size: 50),
+                          title: Text(item['title'] ?? "Untitled"),
+                          subtitle: Text("Price: \$${item['price'] ?? 0.0}"),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Total: \$${totalPrice.toStringAsFixed(2)}",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutPage(
+                          currentUserId: currentUserId,
+                          cartItems: cartItems, // Pass the cart items here
+                        ),
                       ),
                     );
                   },
+                  child: Text("Checkout"),
                 ),
-              ),
-              Divider(),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                   Text("Tax: \$${tax.toStringAsFixed(2)}\nTotal (with tax): \$${totalWithTax.toStringAsFixed(2)}",style:TextStyle(fontSize: 18)),
-                        ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => CheckoutPage( artworkId: '',)),
-                        );
-                      },
-                      child: Text("Checkout",style:TextStyle(fontSize: 18)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           );
         },
-      ),
-    );
-  }
-}
-
-
-// Placeholder for Checkout Page
-class CheckoutPage extends StatelessWidget {
-  final String artworkId;
-
-  CheckoutPage({required this.artworkId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Checkout'),
-      ),
-      body: Center(
-        child: Text('Proceed to checkout for artwork ID: $artworkId'),
       ),
     );
   }

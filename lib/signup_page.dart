@@ -46,7 +46,7 @@ class SignUpPage extends StatelessWidget {
                       );
 
                      // String artistId = generateArtistId();
-                      await FirebaseFirestore.instance.collection('artists').doc(userCredential.user!.uid).set({
+                      await FirebaseFirestore.instance.collection('artists').doc(usernameController.text).set({
                         'email': emailController.text,
                         'firstname': firstNameController.text,
                         'lastname': lastNameController.text,
