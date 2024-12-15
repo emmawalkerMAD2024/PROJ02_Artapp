@@ -108,7 +108,7 @@ if (!snapshot.hasData) {
                   
                   return ListTile(
                     leading: CircleAvatar(
-                     // backgroundImage: NetworkImage(user['profilePicture']),
+                      backgroundImage: NetworkImage(user['profilePicture']),
                     ),
                     title: Text(userName),
                     subtitle: Text(lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
